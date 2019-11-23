@@ -148,14 +148,18 @@ static void fill_stack_nan(void)
 
 void HAL_SITL::run(int argc, char * const argv[], Callbacks* callbacks) const
 {
+    // callbacks is &copter
     assert(callbacks);
 
+    // 1. set pwm input
+    // 2. cast scheduler type
+    // 3. parse command line input and set ports (RCIN_PORT, SIM_IN/OUT) 
     _sitl_state->init(argc, argv);
-
+    // set _main_ctx of scheduler object to ID of current thread
     scheduler->init();
-    uartA->begin(115200);
+    uartA->begin(115200); // location for mavproxy to connect to this software
 
-    rcin->init();
+    rcin->init(); // initialize memory for backend objects. PPM? a handle of backend protocols
     rcout->init();
 
     // spi->init();
@@ -178,10 +182,10 @@ void HAL_SITL::run(int argc, char * const argv[], Callbacks* callbacks) const
         new_argv[new_argv_offset++] = argv[i];
     }
     
-    fill_stack_nan();
+    fill_stack_nan(); // address sanitizer 
 
-    callbacks->setup();
-    scheduler->system_initialized();
+    callbacks->setup(); // scheduler task tick counter and perf. monitor and etc.
+    scheduler->system_initialized(); // sitl does not need much of this
 
     if (getenv("SITL_WATCHDOG_RESET")) {
         const AP_HAL::Util::PersistentData &pd = util->persistent_data;
@@ -200,9 +204,9 @@ void HAL_SITL::run(int argc, char * const argv[], Callbacks* callbacks) const
         signal(SIGALRM, sig_alrm);
         alarm(2);
     }
-    setup_signal_handlers();
+    setup_signal_handlers(); // set handler for termination signal
 
-    uint32_t last_watchdog_save = AP_HAL::millis();
+    uint32_t last_watchdog_save = AP_HAL::millis(); // 2530 milli seconds
 
     while (!HALSITL::Scheduler::_should_reboot) {
         if (HALSITL::Scheduler::_should_exit) {
@@ -210,17 +214,17 @@ void HAL_SITL::run(int argc, char * const argv[], Callbacks* callbacks) const
             exit(0);
         }
         fill_stack_nan();
-        callbacks->loop();
+        callbacks->loop(); // finish initialization and start looping: Copter::loop()
         HALSITL::Scheduler::_run_io_procs();
 
         uint32_t now = AP_HAL::millis();
-        if (now - last_watchdog_save >= 100 && using_watchdog) {
+        if (now - last_watchdog_save >= 100 && using_watchdog) { // SITL not using watchdog
             // save persistent data every 100ms
             last_watchdog_save = now;
             watchdog_save((uint32_t *)&utilInstance.persistent_data, (sizeof(utilInstance.persistent_data)+3)/4);
         }
-
-        if (using_watchdog) {
+        
+        if (using_watchdog) { // SITL not using watchdog
             // note that this only works for a speedup of 1
             alarm(2);
         }

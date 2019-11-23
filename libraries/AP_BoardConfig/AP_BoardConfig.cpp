@@ -285,7 +285,7 @@ const AP_Param::GroupInfo AP_BoardConfig::var_info[] = {
 
 void AP_BoardConfig::init()
 {
-    board_setup();
+    board_setup(); // setup peripherals and drivers, but SITL does not need them. Thus skipped
 
     AP::rtc().set_utc_usec(hal.util->get_hw_rtc(), AP_RTC::SOURCE_HW);
 

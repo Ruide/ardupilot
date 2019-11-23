@@ -219,9 +219,9 @@ void Copter::setup()
     // setup storage layout for copter
     StorageManager::set_layout_copter();
 
-    init_ardupilot();
+    init_ardupilot(); // inistialize all kinds of sensors, serial ports driver, communication drivers ... 
 
-    // initialise the main loop scheduler
+    // initialise the main loop scheduler, (50 tasks), a tick counter log is maintained for each task. perf_info monitors loop performance
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks), MASK_LOG_PM);
 }
 
@@ -614,4 +614,6 @@ Copter::Copter(void)
 
 Copter copter;
 
-AP_HAL_MAIN_CALLBACKS(&copter);
+// Macro to generate int main(), and hal.run(argc, argv, &copter);
+// hal is SITL in current simulation case
+AP_HAL_MAIN_CALLBACKS(&copter); 

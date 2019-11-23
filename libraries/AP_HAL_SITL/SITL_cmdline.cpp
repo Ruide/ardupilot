@@ -145,16 +145,19 @@ static const struct {
 
 void SITL_State::_set_signal_handlers(void) const
 {
+    // fpe: Floating point exception
     struct sigaction sa_fpe = {};
     sigemptyset(&sa_fpe.sa_mask);
     sa_fpe.sa_handler = _sig_fpe;
     sigaction(SIGFPE, &sa_fpe, nullptr);
 
+    // pipe: Write on a pipe with no reader, Broken pipe (POSIX)
     struct sigaction sa_pipe = {};
     sigemptyset(&sa_pipe.sa_mask);
     sa_pipe.sa_handler = SIG_IGN; /* No-op SIGPIPE handler */
     sigaction(SIGPIPE, &sa_pipe, nullptr);
 
+    // segv: Invalid memory segment access (ANSI)
     struct sigaction sa_segv = {};
     sigemptyset(&sa_segv.sa_mask);
     sa_segv.sa_handler = _sig_segv;
@@ -252,7 +255,7 @@ void SITL_State::_parse_command_line(int argc, char * const argv[])
     if (asprintf(&autotest_dir, SKETCHBOOK "/Tools/autotest") <= 0) {
         AP_HAL::panic("out of memory");
     }
-    _set_signal_handlers();
+    _set_signal_handlers(); // set handlers for SIGNALS: floating-point error; segfault; broken pipe
 
     setvbuf(stdout, (char *)0, _IONBF, 0);
     setvbuf(stderr, (char *)0, _IONBF, 0);

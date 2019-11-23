@@ -43,7 +43,7 @@ Scheduler::Scheduler(SITL_State *sitlState) :
 
 void Scheduler::init()
 {
-    _main_ctx = pthread_self();
+    _main_ctx = pthread_self(); // pthread_self - obtain ID of the calling thread
 }
 
 bool Scheduler::in_main_thread() const

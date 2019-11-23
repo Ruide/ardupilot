@@ -38,8 +38,10 @@ void Copter::init_ardupilot()
     load_parameters();
 
     // time per loop - this gets updated in the main loop() based on
-    // actual loop rate
-    G_Dt = 1.0 / scheduler.get_loop_rate_hz();
+    // actual loop rate (rd find SITL is 400hz)  // IMU variables 
+    G_Dt = 1.0 / scheduler.get_loop_rate_hz(); // G_DT is Gyro Delta Time: 
+    // Integration time (in seconds) for the gyros (DCM algorithm)
+    // Updated with the fast loop
 
 #if STATS_ENABLED == ENABLED
     // initialise stats module
@@ -49,7 +51,7 @@ void Copter::init_ardupilot()
     // identify ourselves correctly with the ground station
     mavlink_system.sysid = g.sysid_this_mav;
     
-    // initialise serial ports
+    // initialise serial ports (including console, MavLink, SBus ... And HAL(here SITL) will take care of the drivers) 
     serial_manager.init();
 
     // setup first port early to allow BoardConfig to report errors
@@ -158,7 +160,7 @@ void Copter::init_ardupilot()
 #endif
 
     attitude_control->parameter_sanity_check();
-    pos_control->set_dt(scheduler.get_loop_period_s());
+    pos_control->set_dt(scheduler.get_loop_period_s()); // get the time-allowed-per-loop in seconds (dt is delta time) 100hz = 0.01, 400hz = 0.0025
 
     // init the optical flow sensor
     init_optflow();
@@ -195,7 +197,7 @@ void Copter::init_ardupilot()
     // read Baro pressure at ground
     //-----------------------------
     barometer.set_log_baro_bit(MASK_LOG_IMU);
-    barometer.calibrate();
+    barometer.calibrate(); // will wait 1 second intentionally to wait for barometer to set up. Or else error up to 1meter.
 
     // initialise rangefinder
     init_rangefinder();

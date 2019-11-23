@@ -13,9 +13,9 @@ uint64_t HALSITL::Util::get_hw_rtc() const
     return ((long long)((ts.tv_sec * 1000000) + ts.tv_usec));
 #else
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+    clock_gettime(CLOCK_REALTIME, &ts); /* Get current value of clock CLOCK_ID and store it in TimeSpec.  */
     const uint64_t seconds = ts.tv_sec;
-    const uint64_t nanoseconds = ts.tv_nsec;
+    const uint64_t nanoseconds = ts.tv_nsec; // here SITL get real time from Linux clock
     return (seconds * 1000000ULL + nanoseconds/1000ULL);
 #endif
 }
