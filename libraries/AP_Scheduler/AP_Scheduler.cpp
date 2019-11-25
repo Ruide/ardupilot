@@ -145,7 +145,7 @@ void AP_Scheduler::run(uint32_t time_available)
     }
     
     for (uint8_t i=0; i<_num_tasks; i++) {
-        uint32_t dt = _tick_counter - _last_run[i];
+        uint32_t dt = _tick_counter - _last_run[i]; // _last_run is run counter. it is used with tick to schedule task
         uint32_t interval_ticks = _loop_rate_hz / _tasks[i].rate_hz;
         if (interval_ticks < 1) {
             interval_ticks = 1;
@@ -273,6 +273,8 @@ void AP_Scheduler::loop()
     if (_fastloop_fn) {
         hal.util->persistent_data.scheduler_task = -2;
         _fastloop_fn();
+        // rd added for testing delaying 200ms
+        hal.scheduler->delay(200);
         hal.util->persistent_data.scheduler_task = -1;
     }
 
@@ -306,7 +308,7 @@ void AP_Scheduler::loop()
     // add in extra loop time determined by not achieving scheduler tasks
     time_available += extra_loop_us;
 
-    // run the tasks
+    // run the 50 tasks according to their freq using tick and their counter log
     run(time_available);
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
@@ -331,7 +333,7 @@ void AP_Scheduler::loop()
         }
     }
 
-    // check loop time
+    // check loop time: altogether loop time for fast loop and 50 tasks main loop
     perf_info.check_loop_time(sample_time_us - _loop_timer_start_us);
         
     _loop_timer_start_us = sample_time_us;

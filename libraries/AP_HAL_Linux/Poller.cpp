@@ -87,7 +87,7 @@ bool Poller::register_pollable(Pollable *p, uint32_t events)
     epev.events = events;
     epev.data.ptr = static_cast<void *>(p);
 
-    return epoll_ctl(_epfd, EPOLL_CTL_ADD, p->get_fd(), &epev) == 0;
+    return epoll_ctl(_epfd, EPOLL_CTL_ADD, p->get_fd(), &epev) == 0; // control interface for an epoll file descriptor
 }
 
 void Poller::unregister_pollable(const Pollable *p)

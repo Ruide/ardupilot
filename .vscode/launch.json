@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/sitl/bin/arducopter",
             "args": ["-S", "-I0", "--model", "+", "--speedup", "1", "--defaults","/home/osboxes/Desktop/ardupilot_native_sim/ardupilot/Tools/autotest/default_params/copter.parm"],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,

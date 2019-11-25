@@ -228,7 +228,9 @@ void Copter::setup()
 void Copter::loop()
 {
     scheduler.loop();
-    G_Dt = scheduler.get_last_loop_time_s();
+    // IMU variables
+    // Integration time (in seconds) for the gyros (DCM algorithm); Updated with the fast loop
+    G_Dt = scheduler.get_last_loop_time_s(); // updated by perf_info.check_loop_time()
 }
 
 

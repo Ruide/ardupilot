@@ -53,7 +53,7 @@ bool TimerPollable::setup_timer(uint32_t timeout_usec)
     if (_fd >= 0) {
         return false;
     }
-
+    // timers that notify via file descriptors
     _fd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC|TFD_NONBLOCK);
     if (_fd < 0) {
         return false;
