@@ -114,7 +114,7 @@ void Scheduler::init()
 
         t->thread->set_rate(t->rate);
         t->thread->set_stack_size(1024 * 1024);
-        t->thread->start(t->name, t->policy, t->prio);
+        t->thread->start(t->name, t->policy, t->prio); // here start the thread
     }
 
 #if defined(DEBUG_STACK) && DEBUG_STACK
@@ -211,7 +211,7 @@ void Scheduler::register_timer_failsafe(AP_HAL::Proc failsafe, uint32_t period_u
     _failsafe = failsafe;
 }
 
-void Scheduler::_timer_task()
+void Scheduler::_timer_task() // this is the tasks for timer thread 
 {
     int i;
 
@@ -223,7 +223,7 @@ void Scheduler::_timer_task()
     // now call the timer based drivers
     for (i = 0; i < _num_timer_procs; i++) {
         if (_timer_proc[i]) {
-            _timer_proc[i]();
+            _timer_proc[i](); // here run the registered timer tasks one by one at the timer thread
         }
     }
 

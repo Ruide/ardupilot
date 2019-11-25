@@ -362,7 +362,7 @@ void HAL_Linux::run(int argc, char* const argv[], Callbacks* callbacks) const
     // NOTE: See commit 9f5b4ffca ("AP_HAL_Linux_Class: Correct
     // deadlock, and infinite loop in setup()") for details about the
     // order of scheduler initialize and setup on Linux.
-    scheduler->system_initialized();
+    scheduler->system_initialized(); // _wait_all_threads()
 
     // possibly load external modules
 #if AP_MODULE_SUPPORTED
@@ -374,7 +374,7 @@ void HAL_Linux::run(int argc, char* const argv[], Callbacks* callbacks) const
 #if AP_MODULE_SUPPORTED
     AP_Module::call_hook_setup_start();
 #endif
-    callbacks->setup();
+    callbacks->setup(); // Copter::setup(). initialize drivers and copter's scheduler
 #if AP_MODULE_SUPPORTED
     AP_Module::call_hook_setup_complete();
 #endif
