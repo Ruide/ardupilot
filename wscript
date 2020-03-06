@@ -14,6 +14,8 @@ import boards
 
 from waflib import Build, ConfigSet, Configure, Context, Utils
 
+import inspect
+
 # TODO: implement a command 'waf help' that shows the basic tasks a
 # developer might want to do: e.g. how to configure a board, compile a
 # vehicle, compile all the examples, add a new example. Should fit in
@@ -263,6 +265,13 @@ def configure(cfg):
     cfg.msg('Setting board to', cfg.options.board)
     cfg.get_board().configure(cfg)
 
+    # add -emit-llvm
+    cfg.env.prepend_value('CFLAGS', ['-emit-llvm'])
+    cfg.env.prepend_value('CXXFLAGS', ['-emit-llvm'])
+
+    # print (cfg.env) # location of adding cxxflags and cflags
+    # sys.exit()
+
     cfg.load('clang_compilation_database')
     cfg.load('waf_unit_test')
     cfg.load('mavgen')
@@ -503,6 +512,12 @@ def _load_pre_build(bld):
     if getattr(brd, 'pre_build', None):
         brd.pre_build(bld)    
 
+def dump(obj):
+   for attr in dir(obj):
+       if hasattr( obj, attr ):
+           print( "obj.%s = %s" % (attr, getattr(obj, attr)))
+
+
 def build(bld):
     config_hash = Utils.h_file(bld.bldnode.make_node('ap_config.h').abspath())
     bld.env.CCDEPS = config_hash
@@ -539,6 +554,14 @@ def build(bld):
     _build_recursion(bld)
 
     _build_post_funs(bld)
+
+    # print(bld.env)
+    # # print(bld.ap_program)
+    # print(inspect.getmembers(bld.ap_stlib))
+    # print(dir(bld.ap_stlib))
+    # dump(bld)
+    # sys.exit()
+
 
 ardupilotwaf.build_command('check',
     program_group_list='all',

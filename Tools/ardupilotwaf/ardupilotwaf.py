@@ -11,6 +11,8 @@ from collections import OrderedDict
 
 import ap_persistent
 
+import sys
+
 SOURCE_EXTS = [
     '*.S',
     '*.c',
@@ -484,6 +486,7 @@ def _select_programs_from_group(bld):
 
         for tg in _grouped_programs[group][1:]:
             bld.targets += ',' + tg.name
+        
 
 def options(opt):
     opt.ap_groups = {
@@ -537,5 +540,6 @@ cleaning the build.
 ''')
 
 def build(bld):
+    # Binds a callback method to execute after the scripts are read and before the build starts
     bld.add_pre_fun(_process_build_command)
     bld.add_pre_fun(_select_programs_from_group)

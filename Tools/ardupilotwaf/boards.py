@@ -115,7 +115,7 @@ class Board:
             '-Wno-redundant-decls',
             '-Wno-unknown-pragmas',
             '-Wno-trigraphs',
-            '-Wno-format-contains-nul',
+            # '-Wno-format-contains-nul',
             '-Werror=shadow',
             '-Werror=return-type',
             '-Werror=unused-result',
@@ -175,7 +175,7 @@ class Board:
             '-Wno-redundant-decls',
             '-Wno-unknown-pragmas',
             '-Wno-expansion-to-defined',
-            '-Wno-format-contains-nul',
+            # '-Wno-format-contains-nul',
             '-Werror=attributes',
             '-Werror=format-security',
             '-Werror=format-extra-args',
@@ -202,13 +202,13 @@ class Board:
             env.CXXFLAGS += [
                 '-fcolor-diagnostics',
 
-                '-Werror=address-of-packed-member',
+                # '-Werror=address-of-packed-member',
 
                 '-Werror=inconsistent-missing-override',
                 '-Werror=overloaded-virtual',
 
                 # catch conversion issues:
-                '-Werror=bitfield-enum-conversion',
+                # '-Werror=bitfield-enum-conversion',
                 '-Werror=bool-conversion',
                 '-Werror=constant-conversion',
                 '-Werror=enum-conversion',
