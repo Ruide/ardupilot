@@ -100,8 +100,8 @@ class Board:
         env.DEFINES = {}
 
         env.CFLAGS += [
-            '-ffunction-sections',
-            '-fdata-sections',
+            # '-ffunction-sections',
+            # '-fdata-sections',
             '-fsigned-char',
 
             '-Wall',
@@ -159,8 +159,8 @@ class Board:
         env.CXXFLAGS += [
             '-std=gnu++11',
 
-            '-fdata-sections',
-            '-ffunction-sections',
+            # '-fdata-sections',
+            # '-ffunction-sections',
             '-fno-exceptions',
             '-fsigned-char',
 
@@ -283,6 +283,8 @@ class Board:
             self.embed_ROMFS_files(bld)
 
     def build(self, bld):
+        # rd print
+        print ("just enter Board::build")
         bld.ap_version_append_str('GIT_VERSION', bld.git_head_hash(short=True))
         import time
         ltime = time.localtime()
@@ -597,7 +599,10 @@ class linux(Board):
             cfg.define('AP_STATEDIR', cfg.options.apstatedir)
 
     def build(self, bld):
+        # rd print
+        print ("now before linux build calls super(linux, self).build(bld)")
         super(linux, self).build(bld)
+        print ("now finished super(linux, self).build(bld)")
         if bld.options.upload:
             waflib.Options.commands.append('rsync')
             # Avoid infinite recursion

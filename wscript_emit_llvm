@@ -265,17 +265,17 @@ def configure(cfg):
     cfg.msg('Setting board to', cfg.options.board)
     cfg.get_board().configure(cfg)
 
-    # # add -emit-llvm
-    # cfg.env.prepend_value('CFLAGS', ['-emit-llvm'])
-    # cfg.env.prepend_value('CXXFLAGS', ['-emit-llvm'])
+    # add -emit-llvm
+    cfg.env.prepend_value('CFLAGS', ['-emit-llvm'])
+    cfg.env.prepend_value('CXXFLAGS', ['-emit-llvm'])
 
     # add -ffunction-sections
-    # cfg.env.prepend_value('CFLAGS', ['-ffunction-sections'])
-    # cfg.env.prepend_value('CXXFLAGS', ['-ffunction-sections'])
+    cfg.env.prepend_value('CFLAGS', ['-ffunction-sections'])
+    cfg.env.prepend_value('CXXFLAGS', ['-ffunction-sections'])
 
     # add -fdata-sections
-    # cfg.env.prepend_value('CFLAGS', ['-fdata-sections'])
-    # cfg.env.prepend_value('CXXFLAGS', ['-fdata-sections'])
+    cfg.env.prepend_value('CFLAGS', ['-fdata-sections'])
+    cfg.env.prepend_value('CXXFLAGS', ['-fdata-sections'])
 
     # print (cfg.env) # location of adding cxxflags and cflags
     # sys.exit()
@@ -535,7 +535,7 @@ def _build_recursion(bld):
     for d in dirs_to_recurse:
         # rd print
         # print (d)
-        # print ("now before bld.recurse(d) at for d in dirs_to_recurse")
+        print ("now before bld.recurse(d) at for d in dirs_to_recurse")
         # recurse will go into the directory and execute and wscript at that location
         bld.recurse(d)
 

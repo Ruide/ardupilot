@@ -255,6 +255,28 @@ def ap_program(bld,
         if bld.env.STATIC_LINKING:
             kw['features'].append('static_linking')
 
+    # # rd print
+    # print (tg_constructor)
+
+    # print (name) : bin/arducopter
+
+    # print (kw)
+    # {'cxxflags': ['-include', 'ap_config.h'], 'source': [/home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/GCS_Mavlink.cpp,
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/GCS_Tracker.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/Log.cpp,
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/Parameters.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/RC_Channel.cpp,
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/Tracker.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/camera.cpp,
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/control_auto.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/control_manual.cpp,
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/control_scan.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/control_servo_test.cpp,
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/mode.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/mode_auto.cpp,
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/mode_guided.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/mode_scan.cpp, 
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/radio.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/sensors.cpp, 
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/servos.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/system.cpp, 
+    # /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/tracking.cpp, /home/osboxes/Desktop/conattest/ardupilot/AntennaTracker/version.cpp],
+    # 'use': 'AntennaTracker_libs', 'features': [], 'defines': ['APM_BUILD_DIRECTORY=APM_BUILD_AntennaTracker', 'SKETCH="AntennaTracker"', 
+    # 'SKETCHNAME="AntennaTracker"']}
+    # {'cxxflags': ['-include', 'ap_config.h'], 'source': [/home/osboxes/Desktop/conattest/ardupilot/ArduCopter/AP_Arming.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/AP_Rally.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/AP_State.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/Attitude.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/Copter.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/GCS_Copter.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/GCS_Mavlink.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/Log.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/Parameters.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/RC_Channel.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/UserCode.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/UserParameters.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/afs_copter.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/autoyaw.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/avoidance_adsb.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/baro_ground_effect.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/commands.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/compassmot.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/crash_check.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/ekf_check.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/esc_calibration.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/events.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/failsafe.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/fence.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/heli.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/inertia.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/land_detector.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/landing_gear.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/leds.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_acro.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_acro_heli.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_althold.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_auto.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_autotune.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_avoid_adsb.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_brake.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_circle.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_drift.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_flip.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_flowhold.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_follow.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_guided.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_guided_nogps.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_land.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_loiter.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_poshold.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_rtl.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_smart_rtl.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_sport.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_stabilize.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_stabilize_heli.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_systemid.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_throw.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/mode_zigzag.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/motor_test.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/motors.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/navigation.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/precision_landing.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/radio.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/sensors.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/setup.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/standby.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/surface_tracking.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/system.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/takeoff.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/terrain.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/toy_mode.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/tuning.cpp, /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/version.cpp], 
+    # 'use': 'ArduCopter_libs', 'features': [], 'defines': ['FRAME_CONFIG=MULTICOPTER_FRAME', 'APM_BUILD_DIRECTORY=APM_BUILD_ArduCopter', 'SKETCH="ArduCopter"', 'SKETCHNAME="ArduCopter"']}
+
 
     tg = tg_constructor(
         target='#%s' % name,
@@ -263,6 +285,12 @@ def ap_program(bld,
         program_dir=program_dir,
         **kw
     )
+
+    # rd print
+    # print (tg)
+    # <task_gen 'bin/arducopter' declared in /home/osboxes/Desktop/conattest/ardupilot/ArduCopter>
+
+
     if 'use' in kw and bld.env.STATIC_LINKING:
         # ensure we link against vehicle library
         tg.env.STLIB += [kw['use']]

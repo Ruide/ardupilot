@@ -2,6 +2,8 @@
 # encoding: utf-8
 
 def build(bld):
+    # rd print
+    # print ("now at /home/osboxes/Desktop/conattest/ardupilot/ArduCopter/wscript:def build")
     vehicle = bld.path.name
     bld.ap_stlib(
         name=vehicle + '_libs',
