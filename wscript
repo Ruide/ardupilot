@@ -192,6 +192,12 @@ def configure(cfg):
     cfg.msg('Setting board to', cfg.options.board)
     cfg.get_board().configure(cfg)
 
+
+    # add -emit-llvm
+    cfg.env.prepend_value('CFLAGS', ['-emit-llvm'])
+    cfg.env.prepend_value('CXXFLAGS', ['-emit-llvm'])
+
+
     cfg.load('clang_compilation_database')
     cfg.load('waf_unit_test')
     cfg.load('mavgen')
