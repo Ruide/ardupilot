@@ -20,6 +20,8 @@
 
 const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 
+extern void view_switch_to_rd_and_log();
+
 /*
   constructor for main Copter class
  */
@@ -39,6 +41,8 @@ Copter::Copter(void)
     // init sensor error logging flags
     sensor_health.baro = true;
     sensor_health.compass = true;
+
+    view_switch_to_rd_and_log();
 }
 
 Copter copter;

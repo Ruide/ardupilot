@@ -197,6 +197,12 @@ def configure(cfg):
     cfg.env.prepend_value('CFLAGS', ['-emit-llvm'])
     cfg.env.prepend_value('CXXFLAGS', ['-emit-llvm'])
 
+    # add optee
+    cfg.env.append_value('CFLAGS', ['-I/home/osboxes/Desktop/raspbian-tee/lcu14_optee_hello_world/ta/include'])
+    cfg.env.append_value('CXXFLAGS', ['-I/home/osboxes/Desktop/raspbian-tee/lcu14_optee_hello_world/ta/include'])
+    cfg.env.append_value('CFLAGS', ['-I/home/osboxes/Desktop/raspbian-tee/optee_client/out/export/include'])
+    cfg.env.append_value('CXXFLAGS', ['-I/home/osboxes/Desktop/raspbian-tee/optee_client/out/export/include'])
+
 
     cfg.load('clang_compilation_database')
     cfg.load('waf_unit_test')
