@@ -246,6 +246,17 @@ def get_board(ctx):
 # be worthy to keep board definitions in files of their own.
 
 class sitl(Board):
+
+    toolchain = 'arm-linux-gnueabihf'
+
+    # def configure_env(self, cfg, env):
+    #     super(navio2, self).configure_env(cfg, env)
+
+    #     env.DEFINES.update(
+    #         CONFIG_HAL_BOARD_SUBTYPE = 'HAL_BOARD_SUBTYPE_LINUX_NAVIO2',
+    #     )
+
+
     def configure_env(self, cfg, env):
         super(sitl, self).configure_env(cfg, env)
 
