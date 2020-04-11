@@ -74,6 +74,58 @@
  */
 
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
+
+
+
+namespace {
+unsigned long long rc_loop_total = 0;
+unsigned long long rc_loop_count = 0;
+std::chrono::high_resolution_clock::time_point rc_loop_t1;
+std::chrono::high_resolution_clock::time_point rc_loop_t2;
+
+unsigned long long throttle_loop_total = 0;
+unsigned long long throttle_loop_count = 0;
+std::chrono::high_resolution_clock::time_point throttle_loop_t1;
+std::chrono::high_resolution_clock::time_point throttle_loop_t2;
+
+unsigned long long update_GPS_total = 0;
+unsigned long long update_GPS_count = 0;
+std::chrono::high_resolution_clock::time_point update_GPS_t1;
+std::chrono::high_resolution_clock::time_point update_GPS_t2;
+
+unsigned long long update_batt_compass_total = 0;
+unsigned long long update_batt_compass_count = 0;
+std::chrono::high_resolution_clock::time_point update_batt_compass_t1;
+std::chrono::high_resolution_clock::time_point update_batt_compass_t2;
+
+unsigned long long update_altitude_total = 0;
+unsigned long long update_altitude_count = 0;
+std::chrono::high_resolution_clock::time_point update_altitude_t1;
+std::chrono::high_resolution_clock::time_point update_altitude_t2;
+
+unsigned long long three_hz_loop_total = 0;
+unsigned long long three_hz_loop_count = 0;
+std::chrono::high_resolution_clock::time_point three_hz_loop_t1;
+std::chrono::high_resolution_clock::time_point three_hz_loop_t2;
+
+unsigned long long one_hz_loop_total = 0;
+unsigned long long one_hz_loop_count = 0;
+std::chrono::high_resolution_clock::time_point one_hz_loop_t1;
+std::chrono::high_resolution_clock::time_point one_hz_loop_t2;
+
+unsigned long long ten_hz_logging_loop_total = 0;
+unsigned long long ten_hz_logging_loop_count = 0;
+std::chrono::high_resolution_clock::time_point ten_hz_logging_loop_t1;
+std::chrono::high_resolution_clock::time_point ten_hz_logging_loop_t2;
+
+unsigned long long twentyfive_hz_logging_total = 0;
+unsigned long long twentyfive_hz_logging_count = 0;
+std::chrono::high_resolution_clock::time_point twentyfive_hz_logging_t1;
+std::chrono::high_resolution_clock::time_point twentyfive_hz_logging_t2;
+
+}
 
 #define SCHED_TASK(func, rate_hz, max_time_micros) SCHED_TASK_CLASS(Copter, &copter, func, rate_hz, max_time_micros)
 
@@ -218,6 +270,8 @@ void Copter::loop()
 // Main loop - 400hz
 void Copter::fast_loop()
 {
+    // loop_t1 = std::chrono::high_resolution_clock::now();
+
     // update INS immediately to get current gyro data populated
     ins.update();
 
@@ -230,6 +284,13 @@ void Copter::fast_loop()
     // run EKF state estimator (expensive)
     // --------------------
     read_AHRS();
+
+    // loop_t2 = std::chrono::high_resolution_clock::now();
+    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(loop_t2-loop_t1).count();
+    // printf("measure time microseconds is %llu!\n",duration);
+    // fprintf(stdout, "measure time microseconds is %llu!\n", duration);
+
+
 
 #if FRAME_CONFIG == HELI_FRAME
     update_heli_control_dynamics();
@@ -266,16 +327,31 @@ void Copter::fast_loop()
 // called at 100hz
 void Copter::rc_loop()
 {
+
+    rc_loop_t1 = std::chrono::high_resolution_clock::now();
+
     // Read radio and 3-position switch on radio
     // -----------------------------------------
     read_radio();
     read_control_switch();
+
+    rc_loop_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(rc_loop_t2-rc_loop_t1).count();
+    rc_loop_total += duration;
+    rc_loop_count += 1;
+    if (rc_loop_count % 1000 == 0){
+        printf("average rc_loop measure time microseconds is %llu!\n",rc_loop_total/1000.0);
+        rc_loop_total = 0;
+    }
+
 }
 
 // throttle_loop - should be run at 50 hz
 // ---------------------------
 void Copter::throttle_loop()
 {
+    throttle_loop_t1 = std::chrono::high_resolution_clock::now();
+
     // update throttle_low_comp value (controls priority of throttle vs attitude control)
     update_throttle_thr_mix();
 
@@ -292,12 +368,25 @@ void Copter::throttle_loop()
 
     // compensate for ground effect (if enabled)
     update_ground_effect_detector();
+
+    throttle_loop_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(throttle_loop_t2-throttle_loop_t1).count();
+    throttle_loop_total += duration;
+    throttle_loop_count += 1;
+    if (throttle_loop_count % 1000 == 0){
+        printf("average throttle_loop measure time microseconds is %llu!\n",throttle_loop_total/1000);
+        throttle_loop_total = 0;
+    }
+
+
 }
 
 // update_batt_compass - read battery and compass
 // should be called at 10hz
 void Copter::update_batt_compass(void)
 {
+    update_batt_compass_t1 = std::chrono::high_resolution_clock::now();
+
     // read battery before compass because it may be used for motor interference compensation
     battery.read();
 
@@ -311,6 +400,16 @@ void Copter::update_batt_compass(void)
             DataFlash.Log_Write_Compass(compass);
         }
     }
+
+    update_batt_compass_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(update_batt_compass_t2 -update_batt_compass_t1).count();
+    update_batt_compass_total += duration;
+    update_batt_compass_count += 1;
+    if (update_batt_compass_count % 1000 == 0){
+        printf("average update_batt_compass measure time microseconds is %llu!\n",update_batt_compass_total/1000);
+        update_batt_compass_total = 0;
+    }
+
 }
 
 // Full rate logging of attitude, rate and pid loops
@@ -326,6 +425,7 @@ void Copter::fourhundred_hz_logging()
 // should be run at 10hz
 void Copter::ten_hz_logging_loop()
 {
+    ten_hz_logging_loop_t1 = std::chrono::high_resolution_clock::now();
     // log attitude data if we're not already logging at the higher rate
     if (should_log(MASK_LOG_ATTITUDE_MED) && !should_log(MASK_LOG_ATTITUDE_FAST)) {
         Log_Write_Attitude();
@@ -361,11 +461,22 @@ void Copter::ten_hz_logging_loop()
 #if FRAME_CONFIG == HELI_FRAME
     Log_Write_Heli();
 #endif
+    ten_hz_logging_loop_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(ten_hz_logging_loop_t2 -ten_hz_logging_loop_t1).count();
+    ten_hz_logging_loop_total += duration;
+    ten_hz_logging_loop_count += 1;
+    if (ten_hz_logging_loop_count % 1000 == 0){
+        printf("average ten_hz_logging_loop measure time microseconds is %llu!\n",ten_hz_logging_loop_total/1000);
+        ten_hz_logging_loop_total = 0;
+    }
+
 }
 
 // twentyfive_hz_logging - should be run at 25hz
 void Copter::twentyfive_hz_logging()
 {
+    twentyfive_hz_logging_t1 = std::chrono::high_resolution_clock::now();
+
 #if HIL_MODE != HIL_MODE_DISABLED
     // HIL for a copter needs very fast update of the servo values
     gcs().send_message(MSG_SERVO_OUTPUT_RAW);
@@ -386,11 +497,22 @@ void Copter::twentyfive_hz_logging()
     // log output
     Log_Write_Precland();
 #endif
+    twentyfive_hz_logging_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(twentyfive_hz_logging_t2 -twentyfive_hz_logging_t1).count();
+    twentyfive_hz_logging_total += duration;
+    twentyfive_hz_logging_count += 1;
+    if (twentyfive_hz_logging_count % 1000 == 0){
+        printf("average twentyfive_hz_logging measure time microseconds is %llu!\n",twentyfive_hz_logging_total/1000);
+        twentyfive_hz_logging_total = 0;
+    }
+
 }
 
 // three_hz_loop - 3.3hz loop
 void Copter::three_hz_loop()
 {
+    three_hz_loop_t1 = std::chrono::high_resolution_clock::now();
+
     // check if we've lost contact with the ground station
     failsafe_gcs_check();
 
@@ -410,11 +532,24 @@ void Copter::three_hz_loop()
 
     // update ch6 in flight tuning
     tuning();
+
+    three_hz_loop_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(three_hz_loop_t2 -three_hz_loop_t1).count();
+    three_hz_loop_total += duration;
+    three_hz_loop_count += 1;
+    if (three_hz_loop_count % 1000 == 0){
+        printf("average three_hz_loop measure time microseconds is %llu!\n",three_hz_loop_total/1000);
+        three_hz_loop_total = 0;
+    }
+
 }
 
 // one_hz_loop - runs at 1Hz
 void Copter::one_hz_loop()
 {
+
+    one_hz_loop_t1 = std::chrono::high_resolution_clock::now();
+
     if (should_log(MASK_LOG_ANY)) {
         Log_Write_Data(DATA_AP_STATE, ap.value);
     }
@@ -451,11 +586,23 @@ void Copter::one_hz_loop()
     // indicates that the sensor or subsystem is present but not
     // functioning correctly
     update_sensor_status_flags();
+
+    one_hz_loop_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(one_hz_loop_t2 -one_hz_loop_t1).count();
+    one_hz_loop_total += duration;
+    one_hz_loop_count += 1;
+    if (one_hz_loop_count % 1000 == 0){
+        printf("average one_hz_loop measure time microseconds is %llu!\n",one_hz_loop_total/1000);
+        one_hz_loop_total = 0;
+    }
+
 }
 
 // called at 50hz
 void Copter::update_GPS(void)
 {
+    update_GPS_t1 = std::chrono::high_resolution_clock::now();
+
     static uint32_t last_gps_reading[GPS_MAX_INSTANCES];   // time of last gps message
     bool gps_updated = false;
 
@@ -475,6 +622,16 @@ void Copter::update_GPS(void)
         camera.update();
 #endif
     }
+
+    update_GPS_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(update_GPS_t2 -update_GPS_t1).count();
+    update_GPS_total += duration;
+    update_GPS_count += 1;
+    if (update_GPS_count % 1000 == 0){
+        printf("average update_GPS measure time microseconds is %llu!\n",update_GPS_total/1000);
+        update_GPS_total = 0;
+    }
+
 }
 
 void Copter::init_simple_bearing()
@@ -564,6 +721,8 @@ void Copter::read_AHRS(void)
 // read baro and log control tuning
 void Copter::update_altitude()
 {
+    update_altitude_t1 = std::chrono::high_resolution_clock::now();
+
     // read in baro altitude
     read_barometer();
 
@@ -571,6 +730,15 @@ void Copter::update_altitude()
     if (should_log(MASK_LOG_CTUN)) {
         Log_Write_Control_Tuning();
     }
+    update_altitude_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(update_altitude_t2 -update_altitude_t1).count();
+    update_altitude_total += duration;
+    update_altitude_count += 1;
+    if (update_altitude_count % 1000 == 0){
+        printf("average update_altitude measure time microseconds is %llu!\n",update_altitude_total/1000);
+        update_altitude_total = 0;
+    }
+
 }
 
 AP_HAL_MAIN_CALLBACKS(&copter);

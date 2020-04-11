@@ -1,6 +1,22 @@
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
 
 #define CONTROL_SWITCH_DEBOUNCE_TIME_MS  200
+
+namespace {
+
+unsigned long long read_aux_switches_total = 0;
+unsigned long long read_aux_switches_count = 0;
+std::chrono::high_resolution_clock::time_point read_aux_switches_t1;
+std::chrono::high_resolution_clock::time_point read_aux_switches_t2;
+
+unsigned long long auto_trim_total = 0;
+unsigned long long auto_trim_count = 0;
+std::chrono::high_resolution_clock::time_point auto_trim_t1;
+std::chrono::high_resolution_clock::time_point auto_trim_t2;
+
+}
 
 //Documentation of Aux Switch Flags:
 struct {
@@ -154,6 +170,8 @@ bool Copter::read_3pos_switch(uint8_t chan, uint8_t &ret) const
 // read_aux_switches - checks aux switch positions and invokes configured actions
 void Copter::read_aux_switches()
 {
+    read_aux_switches_t1 = std::chrono::high_resolution_clock::now();
+
     uint8_t switch_position;
 
     // exit immediately during radio failsafe
@@ -167,6 +185,16 @@ void Copter::read_aux_switches()
     read_aux_switch(CH_10, aux_con.CH10_flag, g.ch10_option);
     read_aux_switch(CH_11, aux_con.CH11_flag, g.ch11_option);
     read_aux_switch(CH_12, aux_con.CH12_flag, g.ch12_option);
+
+    read_aux_switches_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(read_aux_switches_t2 -read_aux_switches_t1).count();
+    read_aux_switches_total += duration;
+    read_aux_switches_count += 1;
+    if (read_aux_switches_count % 1000 == 0){
+        printf("average read_aux_switches measure time microseconds is %llu!\n",read_aux_switches_total/1000);
+        read_aux_switches_total = 0;
+    }
+
 }
 
 #undef read_aux_switch
@@ -791,6 +819,8 @@ void Copter::save_trim()
 // meant to be called continuously while the pilot attempts to keep the copter level
 void Copter::auto_trim()
 {
+    auto_trim_t1 = std::chrono::high_resolution_clock::now();
+
     if (auto_trim_counter > 0) {
         auto_trim_counter--;
 
@@ -812,5 +842,14 @@ void Copter::auto_trim()
             AP_Notify::flags.save_trim = false;
         }
     }
+    auto_trim_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(auto_trim_t2 -auto_trim_t1).count();
+    auto_trim_total += duration;
+    auto_trim_count += 1;
+    if (auto_trim_count % 1000 == 0){
+        printf("average auto_trim measure time microseconds is %llu!\n",auto_trim_total/1000);
+        auto_trim_total = 0;
+    }
+
 }
 

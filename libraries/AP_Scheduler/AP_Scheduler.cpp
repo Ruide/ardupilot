@@ -27,6 +27,16 @@
 #include <AP_InertialSensor/AP_InertialSensor.h>
 
 #include <stdio.h>
+#include <time.h>
+#include <chrono>
+
+namespace {
+unsigned long long scheduler_total = 0;
+unsigned long long scheduler_count = 0;
+std::chrono::high_resolution_clock::time_point scheduler_t1;
+std::chrono::high_resolution_clock::time_point scheduler_t2;
+
+}
 
 #if APM_BUILD_TYPE(APM_BUILD_ArduCopter) || APM_BUILD_TYPE(APM_BUILD_ArduSub)
 #define SCHEDULER_DEFAULT_LOOP_RATE 400
@@ -305,7 +315,17 @@ namespace AP {
 
 AP_Scheduler &scheduler()
 {
+    scheduler_t1 = std::chrono::high_resolution_clock::now();
     return *AP_Scheduler::get_instance();
+    scheduler_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(scheduler_t2 -scheduler_t1).count();
+    scheduler_total += duration;
+    scheduler_count += 1;
+    if (scheduler_count % 1000 == 0){
+        printf("average scheduler measure time microseconds is %llu!\n",scheduler_total/1000);
+        scheduler_total = 0;
+    }
+
 }
 
 };

@@ -1,15 +1,62 @@
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
 
 #include "GCS_Mavlink.h"
 
+
+namespace {
+unsigned long long gcs_check_input_total = 0;
+unsigned long long gcs_check_input_count = 0;
+std::chrono::high_resolution_clock::time_point gcs_check_input_t1;
+std::chrono::high_resolution_clock::time_point gcs_check_input_t2;
+
+unsigned long long gcs_send_heartbeat_total = 0;
+unsigned long long gcs_send_heartbeat_count = 0;
+std::chrono::high_resolution_clock::time_point gcs_send_heartbeat_t1;
+std::chrono::high_resolution_clock::time_point gcs_send_heartbeat_t2;
+
+unsigned long long gcs_send_deferred_total = 0;
+unsigned long long gcs_send_deferred_count = 0;
+std::chrono::high_resolution_clock::time_point gcs_send_deferred_t1;
+std::chrono::high_resolution_clock::time_point gcs_send_deferred_t2;
+
+unsigned long long gcs_data_stream_send_total = 0;
+unsigned long long gcs_data_stream_send_count = 0;
+std::chrono::high_resolution_clock::time_point gcs_data_stream_send_t1;
+std::chrono::high_resolution_clock::time_point gcs_data_stream_send_t2;
+
+
+}
+
 void Copter::gcs_send_heartbeat(void)
 {
+    gcs_send_heartbeat_t1 = std::chrono::high_resolution_clock::now();
     gcs().send_message(MSG_HEARTBEAT);
+    gcs_send_heartbeat_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(gcs_send_heartbeat_t2 -gcs_send_heartbeat_t1).count();
+    gcs_send_heartbeat_total += duration;
+    gcs_send_heartbeat_count += 1;
+    if (gcs_send_heartbeat_count % 1000 == 0){
+        printf("average gcs_send_heartbeat measure time microseconds is %llu!\n",gcs_send_heartbeat_total/1000);
+        gcs_send_heartbeat_total = 0;
+    }
 }
 
 void Copter::gcs_send_deferred(void)
 {
+    gcs_send_deferred_t1 = std::chrono::high_resolution_clock::now();
+
     gcs().retry_deferred();
+    gcs_send_deferred_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(gcs_send_deferred_t2 -gcs_send_deferred_t1).count();
+    gcs_send_deferred_total += duration;
+    gcs_send_deferred_count += 1;
+    if (gcs_send_deferred_count % 1000 == 0){
+        printf("average gcs_send_deferred measure time microseconds is %llu!\n",gcs_send_deferred_total/1000);
+        gcs_send_deferred_total = 0;
+    }
+
 }
 
 /*
@@ -1617,7 +1664,19 @@ void Copter::mavlink_delay_cb()
  */
 void Copter::gcs_data_stream_send(void)
 {
+    gcs_data_stream_send_t1 = std::chrono::high_resolution_clock::now();
+
     gcs().data_stream_send();
+    
+    gcs_data_stream_send_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(gcs_data_stream_send_t2 -gcs_data_stream_send_t1).count();
+    gcs_data_stream_send_total += duration;
+    gcs_data_stream_send_count += 1;
+    if (gcs_data_stream_send_count % 1000 == 0){
+        printf("average gcs_data_stream_send measure time microseconds is %llu!\n",gcs_data_stream_send_total/1000);
+        gcs_data_stream_send_total = 0;
+    }
+
 }
 
 /*
@@ -1625,7 +1684,17 @@ void Copter::gcs_data_stream_send(void)
  */
 void Copter::gcs_check_input(void)
 {
+    gcs_check_input_t1 = std::chrono::high_resolution_clock::now();
     gcs().update();
+    gcs_check_input_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(gcs_check_input_t2 -gcs_check_input_t1).count();
+    gcs_check_input_total += duration;
+    gcs_check_input_count += 1;
+    if (gcs_check_input_count % 1000 == 0){
+        printf("average gcs_check_input measure time microseconds is %llu!\n",gcs_check_input_total/1000);
+        gcs_check_input_total = 0;
+    }
+
 }
 
 /*

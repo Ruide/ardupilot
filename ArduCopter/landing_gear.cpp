@@ -1,9 +1,21 @@
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
 
+namespace {
 
+unsigned long long landinggear_update_total = 0;
+unsigned long long landinggear_update_count = 0;
+std::chrono::high_resolution_clock::time_point landinggear_update_t1;
+std::chrono::high_resolution_clock::time_point landinggear_update_t2;
+
+}
 // Run landing gear controller at 10Hz
 void Copter::landinggear_update()
 {
+    landinggear_update_t1 = std::chrono::high_resolution_clock::now();
+
+
     // exit immediately if no landing gear output has been enabled
     if (!SRV_Channels::function_assigned(SRV_Channel::k_landing_gear_control)) {
         return;
@@ -28,4 +40,14 @@ void Copter::landinggear_update()
     }
 
     last_deploy_status = landinggear.deployed();
+
+    landinggear_update_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(landinggear_update_t2 -landinggear_update_t1).count();
+    landinggear_update_total += duration;
+    landinggear_update_count += 1;
+    if (landinggear_update_count % 1000 == 0){
+        printf("average landinggear_update measure time microseconds is %llu!\n",landinggear_update_total/1000);
+        landinggear_update_total = 0;
+    }
+
 }

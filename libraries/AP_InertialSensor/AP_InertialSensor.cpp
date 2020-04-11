@@ -24,6 +24,17 @@
 #include "AP_InertialSensor_Revo.h"
 #include "AP_InertialSensor_BMI055.h"
 
+#include <time.h>
+#include <chrono>
+
+namespace {
+unsigned long long AP_InertialSensor_ins_total = 0;
+unsigned long long AP_InertialSensor_ins_count = 0;
+std::chrono::high_resolution_clock::time_point AP_InertialSensor_ins_t1;
+std::chrono::high_resolution_clock::time_point AP_InertialSensor_ins_t2;
+
+}
+
 /* Define INS_TIMING_DEBUG to track down scheduling issues with the main loop.
  * Output is on the debug console. */
 #ifdef INS_TIMING_DEBUG
@@ -1991,7 +2002,17 @@ namespace AP {
 
 AP_InertialSensor &ins()
 {
+    AP_InertialSensor_ins_t1 = std::chrono::high_resolution_clock::now();
     return *AP_InertialSensor::get_instance();
+    AP_InertialSensor_ins_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(AP_InertialSensor_ins_t2 -AP_InertialSensor_ins_t1).count();
+    AP_InertialSensor_ins_total += duration;
+    AP_InertialSensor_ins_count += 1;
+    if (AP_InertialSensor_ins_count % 1000 == 0){
+        printf("average AP_InertialSensor_ins measure time microseconds is %llu!\n",AP_InertialSensor_ins_total/1000);
+        AP_InertialSensor_ins_total = 0;
+    }
+
 }
 
 };

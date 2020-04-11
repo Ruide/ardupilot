@@ -33,6 +33,16 @@
 #include <StorageManager/StorageManager.h>
 #include <stdio.h>
 
+#include <time.h>
+#include <chrono>
+
+namespace {
+unsigned long long param_notify_total = 0;
+unsigned long long param_notify_count = 0;
+std::chrono::high_resolution_clock::time_point param_notify_t1;
+std::chrono::high_resolution_clock::time_point param_notify_t2;
+}
+
 extern const AP_HAL::HAL &hal;
 
 #define ENABLE_DEBUG 1
@@ -952,6 +962,9 @@ AP_Param::find_object(const char *name)
 
 // notify GCS of current value of parameter
 void AP_Param::notify() const {
+
+    param_notify_t1 = std::chrono::high_resolution_clock::now();
+
     uint32_t group_element = 0;
     const struct GroupInfo *ginfo;
     struct GroupNesting group_nesting {};
@@ -974,6 +987,16 @@ void AP_Param::notify() const {
     }
 
     send_parameter(name, (enum ap_var_type)param_header_type, idx);
+
+    param_notify_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(param_notify_t2 -param_notify_t1).count();
+    param_notify_total += duration;
+    param_notify_count += 1;
+    if (param_notify_count % 1000 == 0){
+        printf("average param_notify measure time microseconds is %llu!\n",param_notify_total/1000);
+        param_notify_total = 0;
+    }
+
 }
 
 

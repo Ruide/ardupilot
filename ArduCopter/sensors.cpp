@@ -1,4 +1,24 @@
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
+
+namespace {
+unsigned long long compass_accumulate_total = 0;
+unsigned long long compass_accumulate_count = 0;
+std::chrono::high_resolution_clock::time_point compass_accumulate_t1;
+std::chrono::high_resolution_clock::time_point compass_accumulate_t2;
+
+unsigned long long compass_cal_update_total = 0;
+unsigned long long compass_cal_update_count = 0;
+std::chrono::high_resolution_clock::time_point compass_cal_update_t1;
+std::chrono::high_resolution_clock::time_point compass_cal_update_t2;
+
+unsigned long long accel_cal_update_total = 0;
+unsigned long long accel_cal_update_count = 0;
+std::chrono::high_resolution_clock::time_point accel_cal_update_t1;
+std::chrono::high_resolution_clock::time_point accel_cal_update_t2;
+
+}
 
 // return barometric altitude in centimeters
 void Copter::read_barometer(void)
@@ -108,6 +128,8 @@ void Copter::init_compass()
  */
 void Copter::compass_accumulate(void)
 {
+    compass_accumulate_t1 = std::chrono::high_resolution_clock::now();
+
     if (!g.compass_enabled) {
         return;
     }
@@ -121,6 +143,15 @@ void Copter::compass_accumulate(void)
             compass.set_initial_location(loc.lat, loc.lng);
             ap.compass_init_location = true;
         }
+    }
+
+    compass_accumulate_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(compass_accumulate_t2 -compass_accumulate_t1).count();
+    compass_accumulate_total += duration;
+    compass_accumulate_count += 1;
+    if (compass_accumulate_count % 1000 == 0){
+        printf("average compass_accumulate measure time microseconds is %llu!\n",compass_accumulate_total/1000);
+        compass_accumulate_total = 0;
     }
 }
 
@@ -164,6 +195,7 @@ void Copter::update_optical_flow(void)
 
 void Copter::compass_cal_update()
 {
+    compass_cal_update_t1 = std::chrono::high_resolution_clock::now();
     static uint32_t compass_cal_stick_gesture_begin = 0;
 
     if (!hal.util->get_soft_armed()) {
@@ -188,10 +220,22 @@ void Copter::compass_cal_update()
 #endif
         }
     }
+    compass_cal_update_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(compass_cal_update_t2 -compass_cal_update_t1).count();
+    compass_cal_update_total += duration;
+    compass_cal_update_count += 1;
+    if (compass_cal_update_count % 1000 == 0){
+        printf("average compass_cal_update measure time microseconds is %llu!\n",compass_cal_update_total/1000);
+        compass_cal_update_total = 0;
+    }
+
 }
 
 void Copter::accel_cal_update()
 {
+    accel_cal_update_t1 = std::chrono::high_resolution_clock::now();
+
+
     if (hal.util->get_soft_armed()) {
         return;
     }
@@ -208,6 +252,16 @@ void Copter::accel_cal_update()
         hal.scheduler->reboot(false);
     }
 #endif
+
+    accel_cal_update_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(accel_cal_update_t2 -accel_cal_update_t1).count();
+    accel_cal_update_total += duration;
+    accel_cal_update_count += 1;
+    if (accel_cal_update_count % 1000 == 0){
+        printf("average accel_cal_update measure time microseconds is %llu!\n",accel_cal_update_total/1000);
+        accel_cal_update_total = 0;
+    }
+
 }
 
 // initialise proximity sensor

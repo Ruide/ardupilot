@@ -13,6 +13,8 @@
 #include <time.h>
 #include <chrono>
 
+#include <stdint.h>
+
 
 #define PTA_INVOKE_TESTS_UUID \
     { 0xd96a5b40, 0xc3e5, 0x21e3, \
@@ -52,19 +54,17 @@ namespace {
 }
 
 
-// extern "C" { // C naming instead of C++ mangling
+extern "C" { // C naming instead of C++ mangling
 	
 	void view_switch_to_rd_and_log()
 	{
-		// if (mprotect((void *)0x600000, 0x200000, PROT_READ ) == -1)
-		//   handle_error("mprotect");
-		// printf("view_switch_to_rd_and_log\n");	
+
 		if (!rd_optee_init){
 
 			rd_optee_init=true;
 
 			/* Initialize a context connecting us to the TEE */
-			printf("Initialize a context from user space! \n");
+			printf("Initialize a context from user space!\n");
 			res = TEEC_InitializeContext(NULL, &ctx);
 			if (res != TEEC_SUCCESS)
 				errx(1, "TEEC_InitializeContext failed with code 0x%x", res);
@@ -73,7 +73,7 @@ namespace {
 			 * Open a session to the "hello world" TA, the TA will print "hello
 			 * world!" in the log when the session is created.
 			 */
-			printf("Open session from user space! \n");
+			// printf("Open session from user space! \n");
 			res = TEEC_OpenSession(&ctx, &sess, &uuid,
 					       TEEC_LOGIN_PUBLIC, NULL, NULL, &err_origin);
 			if (res != TEEC_SUCCESS)
@@ -81,19 +81,27 @@ namespace {
 					res, err_origin);
 		}
 
-		printf("Setting op.params[0].value.a to fffd in user space \n");
+		// printf("Setting op.params[0].value.a to fffd in user space \n");
 		memset(&op, 0, sizeof(op));
 		op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_NONE,
 						 TEEC_NONE, TEEC_NONE);
 		op.params[0].value.a = 0xfffa;
 
-		printf("Invoking PTA to increment op.params[0].value.a: %x\n in user space", op.params[0].value.a);
+		// printf("Invoking PTA to increment op.params[0].value.a: %x\n in user space", op.params[0].value.a);
 		res = TEEC_InvokeCommand(&sess, PTA_INVOKE_TESTS_CMD_TRACE, &op,
 					 &err_origin);
 		if (res != TEEC_SUCCESS)
 			errx(1, "TEEC_InvokeCommand failed with code 0x%x origin 0x%x",
 				res, err_origin);
-		printf("PTA incremented value to %x\n in user space", op.params[0].value.a);
+		// printf("PTA incremented value to %x\n in user space", op.params[0].value.a);
+
+
+		// printf("pagesize is %d", pagesize);
+		// 0000fa40
+
+		size_t pagesize = sysconf(_SC_PAGESIZE);
+		if (mprotect((uintptr_t *)0x800000, pagesize * 16, PROT_EXEC ) == -1)
+			handle_error("mprotect");
 
 	}
 
@@ -104,20 +112,20 @@ namespace {
 		//   handle_error("mprotect");
 		// printf("view_switch_to_text_and_log\n");	
 
-		printf("Setting op.params[0].value.a to fffd in user space \n");
+		// printf("Setting op.params[0].value.a to fffd in user space \n");
 		memset(&op, 0, sizeof(op));
 		op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_NONE,
 						 TEEC_NONE, TEEC_NONE);
 		op.params[0].value.a = 0xfffa;
 
-		printf("Invoking PTA to increment op.params[0].value.a: %x\n in user space", op.params[0].value.a);
+		// printf("Invoking PTA to increment op.params[0].value.a: %x\n in user space", op.params[0].value.a);
 		res = TEEC_InvokeCommand(&sess, PTA_INVOKE_TESTS_CMD_TRACE, &op,
 					 &err_origin);
 		if (res != TEEC_SUCCESS)
 			errx(1, "TEEC_InvokeCommand failed with code 0x%x origin 0x%x",
 				res, err_origin);
-		printf("PTA incremented value to %x\n in user space", op.params[0].value.a);
+		// printf("PTA incremented value to %x\n in user space", op.params[0].value.a);
 
 	}
 
-// }
+}

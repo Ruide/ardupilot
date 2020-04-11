@@ -1,0 +1,5 @@
+#!/bin/bash
+alias waf="$PWD/modules/waf/waf-light"
+CC=clang CXX=clang++ CXXFLAGS="--target=arm-linux-gnueabihf -I/media/rpi/usr/include/arm-linux-gnueabihf -I/media/rpi/usr/include/arm-linux-gnueabihf/c++/6" waf --debug --disable-tests configure --board=sitl 
+waf --targets bin/arducopter
+

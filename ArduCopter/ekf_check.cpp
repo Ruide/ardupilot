@@ -1,4 +1,6 @@
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
 
 /**
  *
@@ -6,6 +8,15 @@
  * to the pilot and helps take countermeasures
  *
  */
+
+
+namespace {
+unsigned long long ekf_check_total = 0;
+unsigned long long ekf_check_count = 0;
+std::chrono::high_resolution_clock::time_point ekf_check_t1;
+std::chrono::high_resolution_clock::time_point ekf_check_t2;
+
+}
 
 #ifndef EKF_CHECK_ITERATIONS_MAX
  # define EKF_CHECK_ITERATIONS_MAX          10      // 1 second (ie. 10 iterations at 10hz) of bad variances signals a failure
@@ -28,6 +39,8 @@ static struct {
 // should be called at 10hz
 void Copter::ekf_check()
 {
+    ekf_check_t1 = std::chrono::high_resolution_clock::now();
+
     // exit immediately if ekf has no origin yet - this assumes the origin can never become unset
     Location temp_loc;
     if (!ahrs.get_origin(temp_loc)) {
@@ -84,6 +97,16 @@ void Copter::ekf_check()
     AP_Notify::flags.ekf_bad = ekf_check_state.bad_variance;
 
     // To-Do: add ekf variances to extended status
+
+    ekf_check_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(ekf_check_t2 -ekf_check_t1).count();
+    ekf_check_total += duration;
+    ekf_check_count += 1;
+    if (ekf_check_count % 1000 == 0){
+        printf("average ekf_check measure time microseconds is %llu!\n",ekf_check_total/1000);
+        ekf_check_total = 0;
+    }
+
 }
 
 // ekf_over_threshold - returns true if the ekf's variance are over the tolerance

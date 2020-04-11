@@ -50,6 +50,18 @@
  #define HAL_BARO_FILTER_DEFAULT 0 // turned off by default
 #endif
 
+#include <time.h>
+#include <chrono>
+
+namespace {
+
+unsigned long long baro_accumulate_total = 0;
+unsigned long long baro_accumulate_count = 0;
+std::chrono::high_resolution_clock::time_point baro_accumulate_t1;
+std::chrono::high_resolution_clock::time_point baro_accumulate_t2;
+
+}
+
 extern const AP_HAL::HAL& hal;
 
 // table of user settable parameters
@@ -698,9 +710,21 @@ void AP_Baro::update(void)
  */
 void AP_Baro::accumulate(void)
 {
+    baro_accumulate_t1 = std::chrono::high_resolution_clock::now();
+
     for (uint8_t i=0; i<_num_drivers; i++) {
         drivers[i]->accumulate();
     }
+
+    baro_accumulate_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(baro_accumulate_t2 -baro_accumulate_t1).count();
+    baro_accumulate_total += duration;
+    baro_accumulate_count += 1;
+    if (baro_accumulate_count % 1000 == 0){
+        printf("average baro_accumulate measure time microseconds is %llu!\n",baro_accumulate_total/1000);
+        baro_accumulate_total = 0;
+    }
+
 }
 
 

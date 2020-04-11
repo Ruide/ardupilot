@@ -1,9 +1,32 @@
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
+
 
 #define ARM_DELAY               20  // called at 10hz so 2 seconds
 #define DISARM_DELAY            20  // called at 10hz so 2 seconds
 #define AUTO_TRIM_DELAY         100 // called at 10hz so 10 seconds
 #define LOST_VEHICLE_DELAY      10  // called at 10hz so 1 second
+
+
+namespace {
+
+unsigned long long arm_motors_check_total = 0;
+unsigned long long arm_motors_check_count = 0;
+std::chrono::high_resolution_clock::time_point arm_motors_check_t1;
+std::chrono::high_resolution_clock::time_point arm_motors_check_t2;
+
+unsigned long long auto_disarm_check_total = 0;
+unsigned long long auto_disarm_check_count = 0;
+std::chrono::high_resolution_clock::time_point auto_disarm_check_t1;
+std::chrono::high_resolution_clock::time_point auto_disarm_check_t2;
+
+unsigned long long lost_vehicle_check_total = 0;
+unsigned long long lost_vehicle_check_count = 0;
+std::chrono::high_resolution_clock::time_point lost_vehicle_check_t1;
+std::chrono::high_resolution_clock::time_point lost_vehicle_check_t2;
+
+}
 
 static uint32_t auto_disarm_begin;
 
@@ -11,6 +34,8 @@ static uint32_t auto_disarm_begin;
 // called at 10hz
 void Copter::arm_motors_check()
 {
+    arm_motors_check_t1 = std::chrono::high_resolution_clock::now();
+
     static int16_t arming_counter;
 
     // check if arming/disarm using rudder is allowed
@@ -78,11 +103,23 @@ void Copter::arm_motors_check()
     } else {
         arming_counter = 0;
     }
+
+    arm_motors_check_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(arm_motors_check_t2 -arm_motors_check_t1).count();
+    arm_motors_check_total += duration;
+    arm_motors_check_count += 1;
+    if (arm_motors_check_count % 1000 == 0){
+        printf("average arm_motors_check measure time microseconds is %llu!\n",arm_motors_check_total/1000);
+        arm_motors_check_total = 0;
+    }
+
 }
 
 // auto_disarm_check - disarms the copter if it has been sitting on the ground in manual mode with throttle low for at least 15 seconds
 void Copter::auto_disarm_check()
 {
+    auto_disarm_check_t1 = std::chrono::high_resolution_clock::now();
+
     uint32_t tnow_ms = millis();
     uint32_t disarm_delay_ms = 1000*constrain_int16(g.disarm_delay, 0, 127);
 
@@ -129,6 +166,17 @@ void Copter::auto_disarm_check()
         init_disarm_motors();
         auto_disarm_begin = tnow_ms;
     }
+
+    auto_disarm_check_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(auto_disarm_check_t2 -auto_disarm_check_t1).count();
+    auto_disarm_check_total += duration;
+    auto_disarm_check_count += 1;
+    if (auto_disarm_check_count % 1000 == 0){
+        printf("average auto_disarm_check measure time microseconds is %llu!\n",auto_disarm_check_total/1000);
+        auto_disarm_check_total = 0;
+    }
+
+
 }
 
 // init_arm_motors - performs arming process including initialisation of barometer and gyros
@@ -345,6 +393,9 @@ void Copter::motors_output()
 // check for pilot stick input to trigger lost vehicle alarm
 void Copter::lost_vehicle_check()
 {
+    lost_vehicle_check_t1 = std::chrono::high_resolution_clock::now();
+
+
     static uint8_t soundalarm_counter;
 
     // disable if aux switch is setup to vehicle alarm as the two could interfere
@@ -367,5 +418,14 @@ void Copter::lost_vehicle_check()
         if (AP_Notify::flags.vehicle_lost == true) {
             AP_Notify::flags.vehicle_lost = false;
         }
+    }
+
+    lost_vehicle_check_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(lost_vehicle_check_t2 -lost_vehicle_check_t1).count();
+    lost_vehicle_check_total += duration;
+    lost_vehicle_check_count += 1;
+    if (lost_vehicle_check_count % 1000 == 0){
+        printf("average lost_vehicle_check measure time microseconds is %llu!\n",lost_vehicle_check_total/1000);
+        lost_vehicle_check_total = 0;
     }
 }

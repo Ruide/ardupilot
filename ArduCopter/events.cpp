@@ -1,5 +1,13 @@
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
 
+namespace {
+unsigned long long gpsglitch_check_total = 0;
+unsigned long long gpsglitch_check_count = 0;
+std::chrono::high_resolution_clock::time_point gpsglitch_check_t1;
+std::chrono::high_resolution_clock::time_point gpsglitch_check_t2;
+}
 /*
  *       This event will be called when the failsafe changes
  *       boolean failsafe reflects the current state
@@ -207,6 +215,8 @@ void Copter::failsafe_terrain_on_event()
 // check for gps glitch failsafe
 void Copter::gpsglitch_check()
 {
+    gpsglitch_check_t1 = std::chrono::high_resolution_clock::now();
+
     // get filter status
     nav_filter_status filt_status = inertial_nav.get_filter_status();
     bool gps_glitching = filt_status.flags.gps_glitching;
@@ -222,6 +232,16 @@ void Copter::gpsglitch_check()
             gcs().send_text(MAV_SEVERITY_CRITICAL,"GPS Glitch cleared");
         }
     }
+
+    gpsglitch_check_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(gpsglitch_check_t2 -gpsglitch_check_t1).count();
+    gpsglitch_check_total += duration;
+    gpsglitch_check_count += 1;
+    if (gpsglitch_check_count % 1000 == 0){
+        printf("average gpsglitch_check measure time microseconds is %llu!\n",gpsglitch_check_total/1000);
+        gpsglitch_check_total = 0;
+    }
+
 }
 
 // set_mode_RTL_or_land_with_pause - sets mode to RTL if possible or LAND with 4 second delay before descent starts

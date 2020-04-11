@@ -1,4 +1,15 @@
 #include "Copter.h"
+#include <time.h>
+#include <chrono>
+
+namespace {
+
+unsigned long long update_throttle_hover_total = 0;
+unsigned long long update_throttle_hover_count = 0;
+std::chrono::high_resolution_clock::time_point update_throttle_hover_t1;
+std::chrono::high_resolution_clock::time_point update_throttle_hover_t2;
+
+}
 
 // get_pilot_desired_heading - transform pilot's yaw input into a
 // desired yaw rate
@@ -37,6 +48,9 @@ float Copter::get_pilot_desired_yaw_rate(int16_t stick_angle)
 //  called at 100hz
 void Copter::update_throttle_hover()
 {
+
+    update_throttle_hover_t1 = std::chrono::high_resolution_clock::now();
+
 #if FRAME_CONFIG != HELI_FRAME
     // if not armed or landed exit
     if (!motors->armed() || ap.land_complete) {
@@ -62,6 +76,16 @@ void Copter::update_throttle_hover()
         motors->update_throttle_hover(0.01f);
     }
 #endif
+
+    update_throttle_hover_t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(update_throttle_hover_t2 -update_throttle_hover_t1).count();
+    update_throttle_hover_total += duration;
+    update_throttle_hover_count += 1;
+    if (update_throttle_hover_count % 1000 == 0){
+        printf("average update_throttle_hover measure time microseconds is %llu!\n",update_throttle_hover_total/1000);
+        update_throttle_hover_total = 0;
+    }
+
 }
 
 // set_throttle_takeoff - allows parents to tell throttle controller we are taking off so I terms can be cleared
